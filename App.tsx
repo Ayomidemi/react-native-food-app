@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 
 export default function App() {
   return (
-    <View>
+    <View className="flex-1 items-center justify-center bg-white">
       <Text>Open up App.tsx to start work on your app!</Text>
       <StatusBar style="auto" />
     </View>
