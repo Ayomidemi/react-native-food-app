@@ -2,10 +2,12 @@ module.exports = {
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: ['@react-native-community', 'eslint-config-prettier'],
   rules: {
+    'react-native/no-inline-styles': 0,
     'prettier/prettier': [
       'error',
       {
         endOfLine: 'auto',
+        'no-inline-styles': false,
       },
     ],
     '@typescript-eslint/no-unused-vars': [
