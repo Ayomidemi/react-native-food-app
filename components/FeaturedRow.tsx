@@ -1,7 +1,9 @@
 import { View, Text, ScrollView } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import RestaurantCard from './RestaurantCard';
+import client from '../sanity';
+import groq from 'groq';
 
 type Props = {
   title: string;
@@ -9,7 +11,37 @@ type Props = {
   id?: string;
 };
 
-const FeaturedRow = ({ title, description }: Props) => {
+const FeaturedRow = ({ id, title, description }: Props) => {
+  const [restaurants, setRestaurants] = useState<any>([]);
+
+  useEffect(() => {
+    client
+      .fetch(
+        groq`
+    *[_type == 'featured' && _id == $id] {
+      ...,
+      restaurant[]->{
+        ...,
+        dishes[]->,
+        type -> {
+          name
+        },
+        image {
+          asset -> {
+            _id,
+            url
+          },
+          alt
+        }
+      }
+    }[0].restaurant`,
+        { id },
+      )
+      .then((data: React.SetStateAction<never[]>) => {
+        setRestaurants(data);
+      });
+  }, [id]);
+
   return (
     <View>
       <View className="mt-4 flex-row items-center justify-between px-4">
@@ -26,54 +58,22 @@ const FeaturedRow = ({ title, description }: Props) => {
         className="pt-4"
       >
         {/* Restaurant Cards */}
-        <RestaurantCard
-          id={123}
-          imgUrl="https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          title="Yo! Sushi"
-          rating={4.5}
-          genre="Sushi"
-          address="123, Lagos street"
-          desc="Test Decsiption"
-          dishes={[]}
-          long={20}
-          lat={0}
-        />
-        <RestaurantCard
-          id={123}
-          imgUrl="https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          title="Yo! Sushi"
-          rating={4.5}
-          genre="Sushi"
-          address="123, Lagos street"
-          desc="Test Decsiption"
-          dishes={[]}
-          long={20}
-          lat={0}
-        />
-        <RestaurantCard
-          id={123}
-          imgUrl="https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          title="Yo! Sushi"
-          rating={4.5}
-          genre="Sushi"
-          address="123, Lagos street"
-          desc="Test Decsiption"
-          dishes={[]}
-          long={20}
-          lat={0}
-        />
-        <RestaurantCard
-          id={123}
-          imgUrl="https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          title="Yo! Sushi"
-          rating={4.5}
-          genre="Sushi"
-          address="123, Lagos street"
-          desc="Test Decsiption"
-          dishes={[]}
-          long={20}
-          lat={0}
-        />
+
+        {restaurants?.map((rest: any) => (
+          <RestaurantCard
+            key={rest._id}
+            id={rest._id}
+            imgUrl={rest?.image.asset.url}
+            title={rest?.name}
+            rating={rest?.rating}
+            genre={rest?.type.name}
+            address={rest?.address}
+            desc={rest?.desc}
+            dishes={[]}
+            long={rest?.long}
+            lat={rest?.lat}
+          />
+        ))}
       </ScrollView>
     </View>
   );

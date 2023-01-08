@@ -22,9 +22,11 @@
     "@sanity/eslint-config-studio": "^2.0.1",
     "@sanity/vision": "^3.1.4",
     "eslint": "^8.6.0",
+    "groq": "^2.33.2",
     "prop-types": "^15.7",
     "react": "^17.0",
     "react-dom": "^17.0",
+    "sanity": "^3.1.4",
     "styled-components": "^5.2.0"
   },
   "devDependencies": {},

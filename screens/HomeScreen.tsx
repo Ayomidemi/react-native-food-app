@@ -6,20 +6,40 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import React, { useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Categories from '../components/Categories';
 import FeaturedRow from '../components/FeaturedRow';
+import client from '../sanity';
+import groq from 'groq';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const [featured, setFeatured] = useState([]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
+
+  useEffect(() => {
+    client
+      .fetch(
+        groq`
+    *[_type == 'featured'] {
+      ...,
+      restaurant[]->{
+        ...,
+        dishes[]->
+      }
+    }`,
+      )
+      .then((data: React.SetStateAction<never[]>) => {
+        setFeatured(data);
+      });
+  }, []);
 
   return (
     <SafeAreaView className="bg-white pt-5">
@@ -59,25 +79,14 @@ const HomeScreen = () => {
         <Categories />
 
         {/* Featured */}
-        <FeaturedRow
-          id="123"
-          title="Feautured"
-          description="Paid placements from our partners"
-        />
-
-        {/* Tasty Discounts */}
-        <FeaturedRow
-          id="1234"
-          title="Tasty Discounts"
-          description="Everyone's been enjoying these juicy discounts!"
-        />
-
-        {/* Offers near you */}
-        <FeaturedRow
-          id="1235"
-          title="Offers near you"
-          description="Why not support your local restaurants tonight!"
-        />
+        {featured?.map((cat: any) => (
+          <FeaturedRow
+            key={cat._id}
+            id={cat._id}
+            title={cat.name}
+            description={cat.desc}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
